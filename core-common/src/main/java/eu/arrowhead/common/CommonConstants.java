@@ -30,6 +30,7 @@ public class CommonConstants {
 
 	public static final String CORE_SYSTEM_AUTHORIZATION = "Authorization";
 	public static final String CORE_SYSTEM_CERTIFICATE_AUTHORITY = "Certificate Authority";
+	public static final String CORE_SYSTEM_CONFIGURATION  = "Configuration";
 	public static final String CORE_SYSTEM_CHOREOGRAPHER = "Choreographer";
 	public static final String CORE_SYSTEM_EVENT_HANDLER = "Event Handler";
 	public static final String CORE_SYSTEM_DATAMANAGER  = "DataManager";
@@ -218,6 +219,8 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_RELAY_TEST_SERVICE = "/init_relay_test";
 	public static final String OP_GATEKEEPER_GET_CLOUD_SERVICE = "/cloud/";
 	public static final String OP_GATEKEEPER_GET_CLOUD_SERVICE_SUFFIX = "{operator}/{name}";
+
+	public static final String CONFIGURATION_URI = "/configuration";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";
