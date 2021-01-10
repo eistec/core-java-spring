@@ -1,9 +1,9 @@
 package eu.arrowhead.core.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-//import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
+
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.datamanager.database.service.ConfigurationDBService;
+import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -68,7 +68,7 @@ public class ConfigurationControllerSystemTest {
     //-------------------------------------------------------------------------------------------------
     @Before
     public void setup() {
-        reset(dataManagerDBService);
+        reset(configurationDBService);
         this.mockMvc = MockMvcBuilders.webAppContextSetup(this.wac).build();
     }
 
@@ -78,7 +78,7 @@ public class ConfigurationControllerSystemTest {
     @Test
     public void echoConfiguration() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(CONFIGURATION_ECHO_URI)
-                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         assertEquals("Got it!", response.getResponse().getContentAsString());

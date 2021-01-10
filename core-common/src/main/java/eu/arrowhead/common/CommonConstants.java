@@ -77,6 +77,8 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_DATAMANAGER_PROXY = "proxy";
 	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
 
+	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
+
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 
 	public static final String CORE_SERVICE_CERTIFICATE_AUTHORITY_SIGN = "ca-sign";
@@ -221,6 +223,8 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_GET_CLOUD_SERVICE_SUFFIX = "{operator}/{name}";
 
 	public static final String CONFIGURATION_URI = "/configuration";
+	public static final String OP_CONFIGURATION_CONF = "/conf";
+	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/manage";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";

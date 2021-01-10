@@ -11,7 +11,7 @@
  *   {Lulea University of Technology} - implementation
  *   Arrowhead Consortia - conceptualization 
  ********************************************************************************/
-package eu.arrowhead.core.datamanagerconfiguration;
+package eu.arrowhead.core.configuration;
 
 import java.util.List;
 import java.util.ArrayList;
@@ -50,18 +50,14 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
-import eu.arrowhead.common.dto.shared.SenML;
-import eu.arrowhead.common.dto.shared.DataManagerSystemsResponseDTO;
-import eu.arrowhead.common.dto.shared.DataManagerServicesResponseDTO;
-import eu.arrowhead.common.dto.shared.DataManagerOperationDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
-import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
-import eu.arrowhead.core.datamanager.service.ProxyService;
-import eu.arrowhead.core.datamanager.service.ProxyElement;
-import eu.arrowhead.core.datamanager.service.HistorianService;
+import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
+//import eu.arrowhead.core.configuration.service.ConfigurationService;
+//import eu.arrowhead.core.datamanager.service.ProxyElement;
+//import eu.arrowhead.core.datamanager.service.HistorianService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -84,14 +80,14 @@ public class ConfigurationController {
 	
 	private final Logger logger = LogManager.getLogger(ConfigurationController.class);
 
-	@Autowired
-	private ProxyService proxyService;
+	//@Autowired
+	//private ProxyService proxyService;
+
+	//@Autowired
+	//private HistorianService historianService;
 
 	@Autowired
-	private HistorianService historianService;
-
-	@Autowired
-	private DataManagerDBService dataManagerDBService;
+	private ConfigurationDBService configurationDBService;
 	
 	//=================================================================================================
 	// methods
@@ -107,6 +103,7 @@ public class ConfigurationController {
 		return "Got it!";
 	}
 	
+	/*
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Interface to the Historian service", response = DataManagerSystemsResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
@@ -383,14 +380,14 @@ public class ConfigurationController {
 				proxyService.updateEndpointFromService(systemName, serviceName, message);
 			}
 		}
-
+	*/
 
 	//=================================================================================================
 	// assistant methods
 	
 	
 	//=================================================================================================
-  private void validateSenMLMessage(String systemName, String serviceName, Vector<SenML> message) {
+	/*private void validateSenMLMessage(String systemName, String serviceName, Vector<SenML> message) {
 	try {
     	Assert.notNull(systemName, "systemName is null.");
     	Assert.notNull(serviceName, "serviceName is null.");
@@ -402,68 +399,6 @@ public class ConfigurationController {
 	} catch(Exception e){
 		throw new BadPayloadException("Missing mandatory field");
 	}
-  }
+  	}*/
 
-  //-------------------------------------------------------------------------------------------------
-  public void validateSenMLContent(final Vector<SenML> message) {
-	try {
-
-    	/* check that bn, bt and bu are included only once, and in the first object */
-    	Iterator<SenML> entry = message.iterator();
-    	int bnc=0, btc=0, buc=0;
-    	while (entry.hasNext()) {
-      		SenML element = entry.next();
-      		if (element.getBn() != null) {
-        		bnc++;
-    	  	}
-      		if (element.getBt() != null) {
-        		btc++;
-      		}
-      		if (element.getBu() != null) {
-        		buc++;
-      		}
-    	}
-
-    	/* bu can only exist once. bt can only exist one, bu can exist 0 or 1 times */
-    	Assert.isTrue(!(bnc != 1 || btc != 1 || buc > 1), "invalid bn/bt/bu");
-
-    	/* bn must exist in [0] */
-    	SenML element = (SenML)message.get(0);
-    	Assert.notNull(element.getBn(), "bn is missing");
-
-    	/* bt must exist in [0] */
-    	Assert.notNull(element.getBt(), "bt is missing");
-
-    	/* bt cannot be negative */
-    	Assert.isTrue(element.getBt() >= 0.0, "a negative base time is not allowed");
-
-    	/* bu must exist in [0], if it exists */
-    	Assert.isTrue(!(element.getBu() == null && buc == 1), "invalid use of bu");
-
-    	/* check that v, bv, sv, etc are included only once per object */
-    	entry = message.iterator();
-    	while (entry.hasNext()) {
-      		element = (SenML)entry.next();
-
-      		int valueCount = 0;
-      		if (element.getV() != null) {
-        		valueCount++;
-      		}
-      		if (element.getVs() != null) {
-        		valueCount++;
-      		}
-      		if (element.getVd() != null) {
-        		valueCount++;
-      		}
-      		if (element.getVb() != null) {
-        		valueCount++;
-			}
-
-      		Assert.isTrue(!(valueCount > 1 && element.getS() == null), "too many value tags");
-		}
-	} catch(Exception e) {
-		throw new BadPayloadException("Illegal request");
-	}
-
-  }	
 }

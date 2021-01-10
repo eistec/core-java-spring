@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2020 {Lulea University of Technology}
+ * Copyright (c) 2021 {Lulea University of Technology}
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -11,7 +11,7 @@
  *   {Lulea University of Technology} - implementation
  *   Arrowhead Consortia - conceptualization 
  ********************************************************************************/
-package eu.arrowhead.core.datamanager;
+package eu.arrowhead.core.configuration;
 
 import eu.arrowhead.common.ApplicationInitListener;
 import eu.arrowhead.common.core.CoreSystemService;
@@ -22,7 +22,7 @@ import java.util.Base64;
 import java.util.List;
 
 @Component
-public class DataManagerApplicationInitListener extends ApplicationInitListener {
+public class ConfigurationApplicationInitListener extends ApplicationInitListener {
 
     //=================================================================================================
     // members
