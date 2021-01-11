@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.DTOConverter;
 import eu.arrowhead.common.exception.ArrowheadException;
@@ -71,6 +72,47 @@ public class ConfigurationDBService {
 	  conn.close();
 	}
 
+	
+	//-------------------------------------------------------------------------------------------------
+	public ConfigurationResponseDTO getConfigForSystem(final String systemName) {
+		logger.debug("getConfigForSystem:");
+
+		ConfigurationResponseDTO ret = null;
+		
+		Connection conn = null;
+	
+		try {
+			conn = getConnection();
+			String sql = "SELECT id, dataType, data, created_at, updated_at FROM configuration_data WHERE systemName=? ORDER BY id DESC LIMIT 1;";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setString(1, systemName);
+	
+			ResultSet rs = stmt.executeQuery();
+			ret = new ConfigurationResponseDTO();
+			
+			// fetch the information
+			rs.next();
+			ret.setId(rs.getLong(1));
+			ret.setSystemName(systemName);
+			ret.setType(rs.getString(2));
+			ret.setData(rs.getString(3));
+			ret.setCreatedAt(rs.getString(4));
+			ret.setUpdatedAt(rs.getString(5));
+			
+			rs.close();
+			stmt.close();
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+		} finally {
+			try {
+				closeConnection(conn);
+			} catch (SQLException e) {
+				logger.debug(e.toString());
+			}
+		}
+	
+		return ret;
+	}
 	
 
 }

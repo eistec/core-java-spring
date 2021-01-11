@@ -38,6 +38,9 @@ public class ConfigurationResponseDTO implements Serializable {
     private static final long serialVersionUID = 1231548244663961370L;
 
     private long id;
+    private String systemName;
+    private String type;
+    private String data;
     private String createdAt;
 	private String updatedAt;
     
@@ -48,19 +51,28 @@ public class ConfigurationResponseDTO implements Serializable {
     public ConfigurationResponseDTO() {}
 
     //-------------------------------------------------------------------------------------------------
-	public ConfigurationResponseDTO(final long systemId, final String createdAt, final String upDatedAt) {
-		this.id = systemId;
-		this.createdAt = createdAt;
-		this.updatedAt = upDatedAt;
+	public ConfigurationResponseDTO(final long id, final String systemName, final String type, final String data, final String createdAt, final String upDatedAt) {
+        this.id = id;
+        this.systemName = "systemName";
+        this.type = "type";
+        this.data = "data";
+		this.createdAt = "createdAt";
+		this.updatedAt = "upDatedAt";
 	}
     
     //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
+    public String getSystemName() { return systemName; }
+    public String getType() { return type; }
+    public String getData() { return data; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
     
     //-------------------------------------------------------------------------------------------------
     public void setId(final long id) { this.id = id; }
+    public void setSystemName(final String systemName) { this.systemName = systemName; }
+    public void setType(final String type) { this.type = type; }
+    public void setData(final String data) { this.data = data; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
     
@@ -69,6 +81,9 @@ public class ConfigurationResponseDTO implements Serializable {
 	public String toString() {
 		return new StringJoiner(", ", ConfigurationResponseDTO.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
+                .add("systemName=" + systemName)
+                .add("type=" + type)
+                .add("data=" +data)
                 .add("createdAt='" + createdAt + "'")
 				.add("updatedAt='" + updatedAt + "'")
 				.toString();

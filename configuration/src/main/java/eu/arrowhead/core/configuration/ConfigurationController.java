@@ -117,7 +117,7 @@ public class ConfigurationController {
 			) {
 		logger.debug("confGet");
 
-		ConfigurationResponseDTO ret = new ConfigurationResponseDTO();
+		ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem("historian"); //new ConfigurationResponseDTO();
 
 		//final ArrayList<String> systems = historianService.getSystems();
 		//ret.setSystems(systems);
