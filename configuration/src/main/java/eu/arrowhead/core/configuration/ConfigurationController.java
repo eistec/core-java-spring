@@ -50,6 +50,7 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -103,26 +104,26 @@ public class ConfigurationController {
 		return "Got it!";
 	}
 	
-	/*
+	
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to the Historian service", response = DataManagerSystemsResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiOperation(value = "Interface to get a configuration file", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path= CommonConstants.OP_DATAMANAGER_HISTORIAN, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerSystemsResponseDTO historianGet(
+	@GetMapping(path= CommonConstants.OP_CONFIGURATION_CONF, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ConfigurationResponseDTO confGet(
 			) {
-		logger.debug("historianGet");
+		logger.debug("confGet");
 
-		DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
+		ConfigurationResponseDTO ret = new ConfigurationResponseDTO();
 
-		final ArrayList<String> systems = historianService.getSystems();
-		ret.setSystems(systems);
+		//final ArrayList<String> systems = historianService.getSystems();
+		//ret.setSystems(systems);
 		return ret;
 	}
-
+	/*
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Interface to get all services that a specific system has active in the Historian service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
 	@ApiResponses (value = {
