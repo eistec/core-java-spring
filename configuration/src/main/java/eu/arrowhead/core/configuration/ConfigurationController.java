@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Iterator;
+import java.util.Base64;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
@@ -27,6 +28,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -56,9 +58,6 @@ import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
-//import eu.arrowhead.core.configuration.service.ConfigurationService;
-//import eu.arrowhead.core.datamanager.service.ProxyElement;
-//import eu.arrowhead.core.datamanager.service.HistorianService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiResponse;
@@ -110,19 +109,63 @@ public class ConfigurationController {
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path= CommonConstants.OP_CONFIGURATION_CONF, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ConfigurationResponseDTO confGet(
+	@GetMapping(path= CommonConstants.OP_CONFIGURATION_RAWCONF + "/{systemName}"/*, produces = MediaType.APPLICATION_JSON_VALUE*/)
+	@ResponseBody public ResponseEntity<byte[]> rawconfGet(
+			@PathVariable(value="systemName", required=true) String systemName
 			) {
-		logger.debug("confGet");
 
-		ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem("historian"); //new ConfigurationResponseDTO();
-
-		//final ArrayList<String> systems = historianService.getSystems();
-		//ret.setSystems(systems);
-		return ret;
+			if(Utilities.isEmpty(systemName)) {
+				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
+			}
+			logger.debug("rawconfGet for {}", systemName);
+			
+			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
+			if(ret == null) {
+				throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_CONFIGURATION_RAWCONF + "/" + systemName);
+			}
+			HttpHeaders headers = new HttpHeaders();
+			headers.set("Content-Type", ret.getContentType());
+    		headers.set("Content-Disposition", "attachment; filename=" + ret.getFileName());
+		
+			ResponseEntity<byte[]> responseEntity;
+			/*if (ret.getType().equals("text/plain") || ret.getType().equals("application/json")) {
+				responseEntity = new ResponseEntity<>(ret.getData().getBytes(), headers, org.springframework.http.HttpStatus.OK);	
+			} else {
+				responseEntity = new ResponseEntity<>("base64".getBytes(), headers, org.springframework.http.HttpStatus.OK);	
+			}*/
+			responseEntity = new ResponseEntity<>(Base64.getDecoder().decode(ret.getData()), headers, org.springframework.http.HttpStatus.OK);	
+    		return responseEntity;
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Interface to get a configuration file", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path= CommonConstants.OP_CONFIGURATION_CONF + "/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ConfigurationResponseDTO confGet(
+			@PathVariable(value="systemName", required=true) String systemName
+			) {
+
+			if(Utilities.isEmpty(systemName)) {
+				throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_CONFIGURATION_RAWCONF);
+			}
+			logger.debug("confGet for {}", systemName);
+			
+			ConfigurationResponseDTO ret = configurationDBService.getConfigForSystem(systemName);
+			if(ret == null) {
+				throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_CONFIGURATION_CONF + "/" + systemName);
+			}
+			
+			return ret;
+	}
+
 	/*
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Interface to get all services that a specific system has active in the Historian service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })

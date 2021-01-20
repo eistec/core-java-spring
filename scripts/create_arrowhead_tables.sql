@@ -440,7 +440,8 @@ CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
 CREATE TABLE IF NOT EXISTS `configuration_data` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
   `systemName` varchar(255) NOT NULL,
-  `dataType` varchar(255) NOT NULL,
+  `fileName` varchar(255) NOT NULL,
+  `contentType` varchar(255) NOT NULL,
   `data` blob NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,

@@ -35,11 +35,12 @@ public class ConfigurationResponseDTO implements Serializable {
     //=================================================================================================
 	// members
 
-    private static final long serialVersionUID = 1231548244663961370L;
+    private static final long serialVersionUID = 1231548247623961591L;
 
     private long id;
     private String systemName;
-    private String type;
+    private String fileName;
+    private String contentType;
     private String data;
     private String createdAt;
 	private String updatedAt;
@@ -48,13 +49,22 @@ public class ConfigurationResponseDTO implements Serializable {
 	// methods
 	
 	//-------------------------------------------------------------------------------------------------	
-    public ConfigurationResponseDTO() {}
-
-    //-------------------------------------------------------------------------------------------------
-	public ConfigurationResponseDTO(final long id, final String systemName, final String type, final String data, final String createdAt, final String upDatedAt) {
+    public ConfigurationResponseDTO() {
         this.id = id;
         this.systemName = "systemName";
-        this.type = "type";
+        this.fileName = "hej.conf";
+        this.contentType = "text/plain";
+        this.data = "data";
+		this.createdAt = "createdAt";
+		this.updatedAt = "upDatedAt";
+    }
+
+    //-------------------------------------------------------------------------------------------------
+	public ConfigurationResponseDTO(final long id, final String systemName, final String fileName, final String contentType, final String data, final String createdAt, final String upDatedAt) {
+        this.id = id;
+        this.systemName = "systemName";
+        this.fileName = "hej.conf";
+        this.contentType = "text/plain";
         this.data = "data";
 		this.createdAt = "createdAt";
 		this.updatedAt = "upDatedAt";
@@ -63,7 +73,8 @@ public class ConfigurationResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
     public long getId() { return id; }
     public String getSystemName() { return systemName; }
-    public String getType() { return type; }
+    public String getFileName() { return fileName; }
+    public String getContentType() { return contentType; }
     public String getData() { return data; }
     public String getCreatedAt() { return createdAt; }
     public String getUpdatedAt() { return updatedAt; }
@@ -71,7 +82,8 @@ public class ConfigurationResponseDTO implements Serializable {
     //-------------------------------------------------------------------------------------------------
     public void setId(final long id) { this.id = id; }
     public void setSystemName(final String systemName) { this.systemName = systemName; }
-    public void setType(final String type) { this.type = type; }
+    public void setFileName(final String fileName) { this.fileName = fileName; }
+    public void setContentType(final String contentType) { this.contentType = contentType; }
     public void setData(final String data) { this.data = data; }
     public void setCreatedAt(final String createdAt) { this.createdAt = createdAt; }
 	public void setUpdatedAt(final String updatedAt) { this.updatedAt = updatedAt; }
@@ -82,7 +94,8 @@ public class ConfigurationResponseDTO implements Serializable {
 		return new StringJoiner(", ", ConfigurationResponseDTO.class.getSimpleName() + "[", "]")
                 .add("id=" + id)
                 .add("systemName=" + systemName)
-                .add("type=" + type)
+                .add("fileName=" + fileName)
+                .add("contentType=" + contentType)
                 .add("data=" +data)
                 .add("createdAt='" + createdAt + "'")
 				.add("updatedAt='" + updatedAt + "'")

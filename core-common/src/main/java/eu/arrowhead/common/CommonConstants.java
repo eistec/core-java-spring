@@ -224,6 +224,7 @@ public class CommonConstants {
 
 	public static final String CONFIGURATION_URI = "/configuration";
 	public static final String OP_CONFIGURATION_CONF = "/conf";
+	public static final String OP_CONFIGURATION_RAWCONF = "/rawconf";
 	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/manage";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
