@@ -50,35 +50,35 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 		final String cloudCN = getServerCloudCN();
 
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
-      // Everybody in the local cloud can test the server => no further check is necessary
-      return;
+                        // Everybody in the local cloud can test the server => no further check is necessary
+                        return;
 		} 
 
-    // only the system named $SysName is allowed to write to <historian or proxy>/$SysName/$SrvName
-    if (!method.toLowerCase().equals("get")) {
-      final String dataManagerHistorianURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/";
-      int sysNameStartPosition = requestTarget.indexOf(dataManagerHistorianURI);
-      int sysNameStopPosition = -1;
-      if ( sysNameStartPosition != -1) {
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerHistorianURI.length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerHistorianURI.length(), sysNameStopPosition);
+                // only the system named $SysName is allowed to write to <historian or proxy>/$SysName/$SrvName
+                if (!method.toLowerCase().equals("get")) {
+                        final String dataManagerHistorianURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/";
+                        int sysNameStartPosition = requestTarget.indexOf(dataManagerHistorianURI);
+                        int sysNameStopPosition = -1;
+                        if ( sysNameStartPosition != -1) {
+                                sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerHistorianURI.length());
+                                String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerHistorianURI.length(), sysNameStopPosition);
 
-        checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
-        return;
-      }
+                                checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
+                                return;
+                        }
 
-      if ( sysNameStartPosition == -1) {
-        final String dataManagerProxyURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/";
-        sysNameStartPosition = requestTarget.indexOf(dataManagerProxyURI);
-        sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerProxyURI.length());
-        String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerProxyURI.length(), sysNameStopPosition);
+                        if ( sysNameStartPosition == -1) {
+                                final String dataManagerProxyURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY+"/";
+                                sysNameStartPosition = requestTarget.indexOf(dataManagerProxyURI);
+                                sysNameStopPosition = requestTarget.indexOf("/", sysNameStartPosition + dataManagerProxyURI.length());
+                                String requestTargetSystemName = requestTarget.substring(sysNameStartPosition + dataManagerProxyURI.length(), sysNameStopPosition);
 
-        checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
-        return;
-      } else {
-        throw new AuthException("Illegal request");
-      }
-    }
+                                checkIfRequesterSystemNameisEqualsWithClientNameFromCN(requestTargetSystemName, clientCN);
+                                return;
+                        } else {
+                                throw new AuthException("Illegal request");
+                        }
+                }
 
 	}
 
