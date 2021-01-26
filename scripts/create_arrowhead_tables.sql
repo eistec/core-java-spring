@@ -330,7 +330,7 @@ CREATE TABLE IF NOT EXISTS `dmhist_messages` (
   `bt` double NOT NULL,
   `mint` double NOT NULL,
   `maxt` double NOT NULL,
-  `msg` BLOB NOT NULL,
+  `msg` text NOT NULL,
   `datastored` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),
   CONSTRAINT `service_id_constr` FOREIGN KEY (`sid`) REFERENCES `dmhist_services` (`id`) ON DELETE CASCADE
@@ -344,8 +344,8 @@ CREATE TABLE IF NOT EXISTS `dmhist_entries` (
   `t` double NOT NULL,
   `u` varchar(64),
   `v`  double,
-  `vs` BLOB,
-  `vb` BOOLEAN,
+  `vs` text,
+  `vb` boolean,
   PRIMARY KEY (`id`),
   CONSTRAINT `service_id_fk` FOREIGN KEY(`sid`) REFERENCES `dmhist_services`(`id`) ON DELETE CASCADE,
   CONSTRAINT `message_id_fk` FOREIGN KEY(`mid`) REFERENCES `dmhist_messages`(`id`) ON DELETE CASCADE
@@ -420,7 +420,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_running_step` (
   `step_id` bigint(20) NOT NULL,
   `session_id` bigint(20) NOT NULL,
   `status` varchar(255) NOT NULL,
-  `message` text,
+  `message` blob,
   `started_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   PRIMARY KEY (`id`),

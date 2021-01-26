@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.internal.DTOConverter;
@@ -103,16 +104,58 @@ public class ConfigurationDBService {
 			stmt.close();
 		} catch (SQLException e) {
 			logger.debug(e.toString());
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
 		} finally {
 			try {
 				closeConnection(conn);
 			} catch (SQLException e) {
 				logger.debug(e.toString());
 			}
+			
 		}
 	
 		return ret;
 	}
 	
+	//-------------------------------------------------------------------------------------------------
+	public ConfigurationResponseDTO setConfigForSystem(final String systemName, final ConfigurationRequestDTO conf) {
+		logger.debug("getConfigForSystem:");
 
+		Connection conn = null;
+
+		try {
+			conn = getConnection();
+
+			String sql = "INSERT INTO configuration_data(systemName, fileName, contentType, data) VALUES(?, ?, ?, ?) ON DUPLICATE KEY UPDATE fileName=?, contentType=?, data=?;";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setString(1, systemName);
+			stmt.setString(2, conf.getFileName());
+			stmt.setString(3, conf.getContentType());
+			stmt.setString(4, conf.getData());
+
+			stmt.setString(5, conf.getFileName());
+			stmt.setString(6, conf.getContentType());
+			stmt.setString(7, conf.getData());
+
+			stmt.executeUpdate();
+			//ResultSet rs = stmt.getGeneratedKeys();
+			//rs.next();
+			//int id = rs.getInt(1);
+			//rs.close();
+			stmt.close();
+
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		} finally {
+			try {
+				closeConnection(conn);
+			} catch (SQLException e) {
+				logger.debug(e.toString());
+			}
+			
+		}
+
+		return getConfigForSystem(systemName);
+	}
 }

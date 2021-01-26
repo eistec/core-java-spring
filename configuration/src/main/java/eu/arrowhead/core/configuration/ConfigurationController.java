@@ -52,6 +52,7 @@ import eu.arrowhead.common.CoreUtilities;
 import eu.arrowhead.common.CoreUtilities.ValidatedPageParams;
 import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
+import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -74,17 +75,18 @@ public class ConfigurationController {
 	
 	//=================================================================================================
 	// members
+	private static final String PATH_VARIABLE_NAME = "name";
+
+	private static final String PUT_CONFIG_MGMT_HTTP_200_MESSAGE = "Configuration updated";
+	private static final String PUT_CONFIG_MGMT_HTTP_400_MESSAGE = "Could not store configration data";
 	
 	private static final String OP_NOT_VALID_ERROR_MESSAGE = " Illegal operation. ";
 	private static final String NOT_FOUND_ERROR_MESSAGE = " Resource not found. ";
+
+	private static final String CONFIG_MGMT_URI =  CoreCommonConstants.MGMT_URI + "/config";
+	private static final String CONFIG_BY_NAME_MGMT_URI = CONFIG_MGMT_URI + "/{" + PATH_VARIABLE_NAME + "}";
 	
 	private final Logger logger = LogManager.getLogger(ConfigurationController.class);
-
-	//@Autowired
-	//private ProxyService proxyService;
-
-	//@Autowired
-	//private HistorianService historianService;
 
 	@Autowired
 	private ConfigurationDBService configurationDBService;
@@ -131,7 +133,7 @@ public class ConfigurationController {
     		headers.set("Content-Disposition", "attachment; filename=" + ret.getFileName());
 		
 			ResponseEntity<byte[]> responseEntity;
-			/*if (ret.getType().equals("text/plain") || ret.getType().equals("application/json")) {
+			/*if (ret.getType().equals("text/plain") || ret.getType().equals("application/json")) { XXX_remove later!!!
 				responseEntity = new ResponseEntity<>(ret.getData().getBytes(), headers, org.springframework.http.HttpStatus.OK);	
 			} else {
 				responseEntity = new ResponseEntity<>("base64".getBytes(), headers, org.springframework.http.HttpStatus.OK);	
@@ -166,283 +168,42 @@ public class ConfigurationController {
 			return ret;
 	}
 
-	/*
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to get all services that a specific system has active in the Historian service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
+	@ApiOperation(value = "Store new configuration", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_CONFIG_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_CONFIG_MGMT_HTTP_400_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerServicesResponseDTO historianSystemGet(
-		@PathVariable(value="systemName", required=true) String systemName
-		) {
-		logger.debug("historianSystemGet for {}", systemName);
-
-    if(Utilities.isEmpty(systemName)) {
-      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
-    }
-
-		DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
-		final ArrayList<String> services = historianService.getServicesFromSystem(systemName);
-		ret.setServices(services);
-
-		return ret;
+	@PutMapping(path = CONFIG_BY_NAME_MGMT_URI, consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ConfigurationResponseDTO storeConfigurationForSystem(@PathVariable(value = PATH_VARIABLE_NAME) final String systemName, @RequestBody final ConfigurationRequestDTO config) {
+		logger.debug("New configurationStore put request recieved with name: {}", systemName);
+		final String origin = CommonConstants.CONFIGURATION_URI + CONFIG_BY_NAME_MGMT_URI;	
+		
+		validateConfigRequestDTO(systemName, config, origin);
+		final ConfigurationResponseDTO configResponse = configurationDBService.setConfigForSystem(systemName, config);
+		
+		logger.debug("System '{}' is successfully updated with new config {}", systemName, config.toString());
+		return configResponse;
 	}
 
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to get sensor data from a service", response = SenML.class, responseContainer="Vector", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
-			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{system}/{service}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public Vector<SenML> historianServiceGet(
-		@PathVariable(value="system", required=true) String systemName,
-		@PathVariable(value="service", required=true) String serviceName,
-		@RequestParam MultiValueMap<String, String> params
-		) {
-
-    if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-      throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
-    }
-		logger.debug("historianServiceGet for {}/{}", systemName, serviceName);
-
-		double from=-1, to=-1;
-		int count = 1;
-
-		Vector<String> signals = new Vector<String>();
-		Vector<Integer> signalCounts = new Vector<Integer>();
-		Iterator<String> it = params.keySet().iterator();
-		int signalCountId = 0;
-		while(it.hasNext()){
-			String par = it.next();
-			if (par.equals("count")) {
-				try {
-					count = Integer.parseInt(params.getFirst(par));
-				} catch(NumberFormatException nfe) {
-					throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-				}
-			} else if (par.equals("sig"+signalCountId)) {
-				signals.add(params.getFirst(par));
-        		int signalXCount = 1;
-        		if (params.getFirst("sig"+signalCountId+"count") != null) {
-          			try {
-            			signalXCount = Integer.parseInt(params.getFirst("sig"+signalCountId+"count"));
-          			} catch(NumberFormatException nfe) {
-            			throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-          			}
-        		}
-        		if (signalXCount <= 0) {
-            		throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-        		}
-				signalCounts.add(signalXCount);
-				signalCountId++;
-			} else if (par.equals("from")) {
-				try {
-					from = Double.parseDouble(params.getFirst(par));
-				}  catch(NumberFormatException nfe) {
-					throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-				}
-			} else if (par.equals("to")) {
-				try {
-					to = Double.parseDouble(params.getFirst(par));
-				}  catch(NumberFormatException nfe) {
-					throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-				}
-			}
-		}
-
-		if (count <= 0) {
-      		throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN + "/" + systemName + "/" + serviceName);
-		}
-
-		Vector<SenML> ret = null;
-
-		if(signals.isEmpty()){
-			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, count);
-		} else {
-			ret = historianService.fetchEndpoint(systemName, serviceName, from, to, signalCounts, signals);
-		}
-
-		if (ret == null) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND);
-		}
-
-		return ret;
-	}
-
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to put sensor data from a service", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PutMapping(value= CommonConstants.OP_DATAMANAGER_HISTORIAN + "/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void historianServicePut(
-	@PathVariable(value="systemName", required=true) String systemName,
-	@PathVariable(value="serviceName", required=true) String serviceName,
-	@RequestBody Vector<SenML> message
-	) {
-        if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_HISTORIAN);
-        }
-		logger.debug("historianServicePut for {}/{}", systemName, serviceName);
-
-		validateSenMLMessage(systemName, serviceName, message);
-
-		historianService.createEndpoint(systemName, serviceName);
-
-		SenML head = message.firstElement();
-		if(head.getBt() == null) {
-			head.setBt((double)System.currentTimeMillis() / 1000);
-		}
-
-		validateSenMLContent(message);
-
-		final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, message);
-		if (!statusCode) {
-			throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
-		}
-	}
-
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Start interface for the Proxy service", response = DataManagerSystemsResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY, produces=MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerSystemsResponseDTO proxyGet() {
-		logger.debug("proxyGet ...");
-
-		DataManagerSystemsResponseDTO ret = new DataManagerSystemsResponseDTO();
-
-		final List<String> systems = proxyService.getAllSystems();
-		ret.setSystems(systems);
-
-		return ret;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to get a system's all services in the Proxy service", response = DataManagerServicesResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public DataManagerServicesResponseDTO proxySystemGet(
-			@PathVariable(value="systemName", required=true) String systemName
-		) {
-        if(Utilities.isEmpty(systemName)) {
-            throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-        }
-		logger.debug("proxySystemGet for {}", systemName);
-
-		DataManagerServicesResponseDTO ret = new DataManagerServicesResponseDTO();
-		final ArrayList<String> services = proxyService.getEndpointsNamesFromSystem(systemName);
-		ret.setServices(services);
-		return ret;
-	}
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to get a system's last service data", response = SenML.class, responseContainer="Vector", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@GetMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}/{serviceName}", produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public Vector<SenML> proxyServiceGet(
-			@PathVariable(value="systemName", required=true) String systemName,
-			@PathVariable(value="serviceName", required=true) String serviceName
-			) {
-            if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName)) {
-                throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-            }
-			logger.debug("proxyServiceGet for {}/{}", systemName, serviceName);
-
-			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
-			if (pe == null) {
-				logger.debug("proxy GET to serviceName: " + serviceName + " not found");
-				throw new DataNotFoundException(NOT_FOUND_ERROR_MESSAGE, HttpStatus.SC_NOT_FOUND, CommonConstants.OP_DATAMANAGER_PROXY + "/" + systemName + "/" + serviceName);
-			}
-
-			return pe.getMessage();
-  }
-
-	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to update a system's last data", tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
-	@ApiResponses (value = {
-		@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_CREATED, message = CoreCommonConstants.SWAGGER_HTTP_201_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = CoreCommonConstants.SWAGGER_HTTP_400_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
-		@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
-	})
-	@PutMapping(value= CommonConstants.OP_DATAMANAGER_PROXY + "/{systemName}/{serviceName}", consumes = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public void proxyServicePut(
-			@PathVariable(value="systemName", required=true) String systemName,
-			@PathVariable(value="serviceName", required=true) String serviceName,
-			@RequestBody Vector<SenML> message
-			) {
-            if(Utilities.isEmpty(systemName) || Utilities.isEmpty(serviceName) || message == null) {
-                throw new InvalidParameterException(OP_NOT_VALID_ERROR_MESSAGE, HttpStatus.SC_BAD_REQUEST, CommonConstants.OP_DATAMANAGER_PROXY);
-            }
-			logger.debug("proxyServicePut for {}/{}", systemName, serviceName);
-
-			validateSenMLMessage(systemName, serviceName, message);
-
-			SenML head = message.firstElement();
-			if(head.getBt() == null) {
-				head.setBt((double)System.currentTimeMillis() / 1000);
-			}
-
-			validateSenMLContent(message);
-
-			final ProxyElement pe = proxyService.getEndpointFromService(systemName, serviceName);
-			if (pe == null) {
-				final boolean ret = proxyService.addEndpointForService(new ProxyElement(systemName, serviceName));
-				if (ret==true){
-					proxyService.updateEndpointFromService(systemName, serviceName, message);
-				} else { 
-					throw new ResponseStatusException(org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR);
-				}
-			} else {
-				proxyService.updateEndpointFromService(systemName, serviceName, message);
-			}
-		}
-	*/
 
 	//=================================================================================================
 	// assistant methods
-	
-	
-	//=================================================================================================
-	/*private void validateSenMLMessage(String systemName, String serviceName, Vector<SenML> message) {
-	try {
-    	Assert.notNull(systemName, "systemName is null.");
-    	Assert.notNull(serviceName, "serviceName is null.");
-    	Assert.notNull(message, "message is null.");
-    	Assert.isTrue(!message.isEmpty(), "message is empty");
 
-    	SenML head = (SenML)message.get(0);
-		Assert.notNull(head.getBn(), "bn is null.");
-	} catch(Exception e){
-		throw new BadPayloadException("Missing mandatory field");
+	private void validateConfigRequestDTO(final String systemName, final ConfigurationRequestDTO dto, final String origin) {
+		logger.debug("validateConfigRequestDTO started...");
+
+		try {
+			Assert.notNull(systemName, "systemName is null.");
+			Assert.notNull(dto.getSystemName(), "systemName is null.");
+			Assert.notNull(dto.getFileName(), "filename is null.");
+			Assert.notNull(dto.getContentType(), "contentType is null.");
+			Assert.notNull(dto.getData(), "data is null.");
+		} catch(Exception e){
+			throw new BadPayloadException("Bad payload");
+		}
 	}
-  	}*/
-
+	
 }
