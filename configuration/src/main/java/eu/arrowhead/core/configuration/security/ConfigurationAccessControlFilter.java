@@ -49,9 +49,14 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
 		final String cloudCN = getServerCloudCN();
 
 		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
-      // Everybody in the local cloud can test the server => no further check is necessary
-      return;
-		} 
+			// Everybody in the local cloud can test the server => no further check is necessary
+		} else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
+			// Only the local System Operator can use these methods
+                        checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
+                } else if (requestTarget.contains(CommonConstants.OP_CONFIGURATION_CONF) || requestTarget.contains(CommonConstants.OP_CONFIGURATION_RAWCONF)) {
+			final EventPublishRequestDTO eventPublishRequestDTO = Utilities.fromJson(requestJSON, EventPublishRequestDTO.class);
+			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(eventPublishRequestDTO.getSource().getSystemName(), clientCN);
+                } 
 
 	}
 
