@@ -439,7 +439,7 @@ CREATE TABLE IF NOT EXISTS `choreographer_worklog` (
 -- Configuration
 CREATE TABLE IF NOT EXISTS `configuration_data` (
   `id` bigint(20) NOT NULL AUTO_INCREMENT,
-  `systemName` varchar(255) NOT NULL,
+  `systemName` varchar(255) NOT NULL UNIQUE,
   `fileName` varchar(255) NOT NULL,
   `contentType` varchar(255) NOT NULL,
   `data` blob NOT NULL,

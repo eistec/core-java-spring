@@ -26,7 +26,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Component;
 
 import eu.arrowhead.common.Utilities;
-//import eu.arrowhead.common.core.CoreSystem;
+import eu.arrowhead.common.core.CoreSystem;
 import eu.arrowhead.common.exception.AuthException;
 
 import java.util.Map;
@@ -46,20 +46,52 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
 	protected void checkClientAuthorized(final String clientCN, final String method, final String requestTarget, final String requestJSON, final Map<String,String[]> queryParams) {
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 
-		final String cloudCN = getServerCloudCN();
+                final String cloudCN = getServerCloudCN();
 
-		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
+		if (requestTarget.equals(CommonConstants.CONFIGURATION_URI + CommonConstants.ECHO_URI)) {
 			// Everybody in the local cloud can test the server => no further check is necessary
-		} else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
+                } else if (requestTarget.endsWith("/favicon.ico")) {
+                        // ok
+                } else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
 			// Only the local System Operator can use these methods
                         checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
                 } else if (requestTarget.contains(CommonConstants.OP_CONFIGURATION_CONF) || requestTarget.contains(CommonConstants.OP_CONFIGURATION_RAWCONF)) {
-			final EventPublishRequestDTO eventPublishRequestDTO = Utilities.fromJson(requestJSON, EventPublishRequestDTO.class);
-			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(eventPublishRequestDTO.getSource().getSystemName(), clientCN);
-                } 
+                        final String client = getSystemNameFromURI(requestTarget);
+                
+			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(client, clientCN);
+                } else {
+                        throw new AuthException("Illegal request", HttpStatus.UNAUTHORIZED.value());
+                }
 
 	}
 
+        //-------------------------------------------------------------------------------------------------
+        private String getSystemNameFromURI(final String requestTarget) {
+                final String configurationConfURI = CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_CONF;
+                final String configurationRawConfURI = CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_RAWCONF;
+                
+                int sysNameStartPosition = requestTarget.indexOf(configurationConfURI);
+                int sysNameStopPosition = -1;
+                if ( sysNameStartPosition != -1) {
+                        sysNameStopPosition = requestTarget.lastIndexOf("/");
+                        final String requestTargetSystemName = requestTarget.substring(sysNameStopPosition + 1);
+
+                        return requestTargetSystemName;
+                }
+
+                sysNameStartPosition = requestTarget.indexOf(configurationRawConfURI);
+                if ( sysNameStartPosition != -1) {
+                        sysNameStopPosition = requestTarget.lastIndexOf("/");
+                        final String requestTargetSystemName = requestTarget.substring(sysNameStopPosition + 1);                       
+                        
+                        return requestTargetSystemName;
+                } else {
+                        throw new AuthException("Illegal request", HttpStatus.UNAUTHORIZED.value());
+                }
+
+
+                return null;
+        }
 	//-------------------------------------------------------------------------------------------------
         private void checkIfRequesterSystemNameisEqualsWithClientNameFromCN(final String requesterSystemName, final String clientCN) {
                 final String clientNameFromCN = getClientNameFromCN(clientCN);
