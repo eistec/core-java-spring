@@ -76,12 +76,12 @@ public class DataManagerControllerSystemTest {
     }
 
     //=================================================================================================
-    // Tests of Historian echo service
+    // Test of Historian echo service
 
     @Test
     public void echoHistorian() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_ECHO_URI)
-                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         assertEquals("Got it!", response.getResponse().getContentAsString());
@@ -90,7 +90,7 @@ public class DataManagerControllerSystemTest {
     @Test
     public void testProxy() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_PROXY_URI)
-                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         final DataManagerSystemsResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), DataManagerSystemsResponseDTO.class);
@@ -100,7 +100,7 @@ public class DataManagerControllerSystemTest {
     @Test
     public void testHistorian() throws Exception {
         final MvcResult response = this.mockMvc.perform(get(DATAMANAGER_HISTORIAN_URI)
-                                                                .accept(MediaType.APPLICATION_JSON))
+                                               .accept(MediaType.APPLICATION_JSON))
                                                .andExpect(status().isOk())
                                                .andReturn();
         final DataManagerSystemsResponseDTO responseBody = objectMapper.readValue(response.getResponse().getContentAsString(), DataManagerSystemsResponseDTO.class);

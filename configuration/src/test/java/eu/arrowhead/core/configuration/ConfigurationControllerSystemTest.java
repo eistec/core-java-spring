@@ -59,8 +59,8 @@ public class ConfigurationControllerSystemTest {
     private ConfigurationDBService configurationDBService;
 
     private static final String CONFIGURATION_ECHO_URI  = "/configuration/echo";
-    //private static final String DATAMANAGER_PROXY_URI  = "/datamanager/proxy";
-    //private static final String DATAMANAGER_HISTORIAN_URI  = "/datamanager/historian";
+    private static final String CONFIGUATION_CONF_URI  = "/configuration/conf";
+    private static final String CONFIGUATION_RAWCONF_URI  = "/configuration/rawconf";
 
     //=================================================================================================
     // methods
