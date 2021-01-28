@@ -182,6 +182,24 @@ public class ConfigurationController {
 		return configResponse;
 	}
 
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Delete configuration", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses(value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = PUT_CONFIG_MGMT_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_BAD_REQUEST, message = PUT_CONFIG_MGMT_HTTP_400_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@DeleteMapping(path = CONFIG_BY_NAME_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ConfigurationResponseDTO deleteConfigurationForSystem(@PathVariable(value = PATH_VARIABLE_NAME) final String systemName) {
+		logger.debug("New configurationStore delete request recieved with name: {}", systemName);
+		final String origin = CommonConstants.CONFIGURATION_URI + CONFIG_BY_NAME_MGMT_URI;	
+		
+		final ConfigurationResponseDTO configResponse = configurationDBService.deleteConfigForSystem(systemName);
+		
+		logger.debug("System '{}' is successfully deleted", systemName);
+		return configResponse;
+	}
 
 	//=================================================================================================
 	// assistant methods

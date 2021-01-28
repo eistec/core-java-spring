@@ -137,12 +137,8 @@ public class ConfigurationDBService {
 			stmt.setString(5, conf.getFileName());
 			stmt.setString(6, conf.getContentType());
 			stmt.setString(7, conf.getData());
-
+			
 			stmt.executeUpdate();
-			//ResultSet rs = stmt.getGeneratedKeys();
-			//rs.next();
-			//int id = rs.getInt(1);
-			//rs.close();
 			stmt.close();
 
 		} catch (SQLException e) {
@@ -158,5 +154,45 @@ public class ConfigurationDBService {
 		}
 
 		return getConfigForSystem(systemName);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public ConfigurationResponseDTO deleteConfigForSystem(final String systemName) {
+		logger.debug("deleteConfigForSystem:");
+
+		// check if config exists
+		ConfigurationResponseDTO ret = getConfigForSystem(systemName);
+		if (ret == null) {
+			return null;
+		}
+
+		Connection conn = null;
+		try {
+			conn = getConnection();
+
+			String sql = "DELETE FROM configuration_data WHERE systemName=?;";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+			stmt.setString(1, systemName);
+
+			int results = stmt.executeUpdate();
+			stmt.close();
+
+			if (results == 0) {
+				ret = null;
+			}
+
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		} finally {
+			try {
+				closeConnection(conn);
+			} catch (SQLException e) {
+				logger.debug(e.toString());
+			}
+			
+		}
+
+		return ret;
 	}
 }
