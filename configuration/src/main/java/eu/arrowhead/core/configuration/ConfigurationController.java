@@ -114,7 +114,7 @@ public class ConfigurationController {
 			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
-	@GetMapping(path= CommonConstants.OP_CONFIGURATION_RAWCONF + "/{systemName}"/*, produces = MediaType.APPLICATION_JSON_VALUE*/)
+	@GetMapping(path= CommonConstants.OP_CONFIGURATION_RAWCONF + "/{systemName}")
 	@ResponseBody public ResponseEntity<byte[]> rawconfGet(
 			@PathVariable(value="systemName", required=true) String systemName
 			) {
@@ -132,13 +132,7 @@ public class ConfigurationController {
 			headers.set("Content-Type", ret.getContentType());
     		headers.set("Content-Disposition", "attachment; filename=" + ret.getFileName());
 		
-			ResponseEntity<byte[]> responseEntity;
-			/*if (ret.getType().equals("text/plain") || ret.getType().equals("application/json")) { XXX_remove later!!!
-				responseEntity = new ResponseEntity<>(ret.getData().getBytes(), headers, org.springframework.http.HttpStatus.OK);	
-			} else {
-				responseEntity = new ResponseEntity<>("base64".getBytes(), headers, org.springframework.http.HttpStatus.OK);	
-			}*/
-			responseEntity = new ResponseEntity<>(Base64.getDecoder().decode(ret.getData()), headers, org.springframework.http.HttpStatus.OK);	
+			ResponseEntity<byte[]> responseEntity = new ResponseEntity<>(Base64.getDecoder().decode(ret.getData()), headers, org.springframework.http.HttpStatus.OK);	
     		return responseEntity;
 	}
 

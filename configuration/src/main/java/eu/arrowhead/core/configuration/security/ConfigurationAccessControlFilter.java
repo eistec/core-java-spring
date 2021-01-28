@@ -90,7 +90,7 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
                 }
 
 
-                return null;
+                //return null;
         }
 	//-------------------------------------------------------------------------------------------------
         private void checkIfRequesterSystemNameisEqualsWithClientNameFromCN(final String requesterSystemName, final String clientCN) {

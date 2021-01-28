@@ -49,7 +49,7 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 
 		final String cloudCN = getServerCloudCN();
 
-		if (requestTarget.endsWith(CommonConstants.ECHO_URI)) {
+		if (requestTarget.endsWith(CommonConstants.DATAMANAGER_URI + CommonConstants.ECHO_URI)) {
                         // Everybody in the local cloud can test the server => no further check is necessary
                         return;
 		} 

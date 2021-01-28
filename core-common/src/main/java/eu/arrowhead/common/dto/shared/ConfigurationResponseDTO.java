@@ -15,14 +15,9 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.HashMap;
-//import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
-
-//import org.springframework.util.Assert;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.Map;
 
 import java.util.StringJoiner;
 
@@ -50,24 +45,17 @@ public class ConfigurationResponseDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------	
     public ConfigurationResponseDTO() {
-        this.id = id;
-        this.systemName = "systemName";
-        this.fileName = "hej.conf";
-        this.contentType = "text/plain";
-        this.data = "data";
-		this.createdAt = "createdAt";
-		this.updatedAt = "upDatedAt";
     }
 
     //-------------------------------------------------------------------------------------------------
 	public ConfigurationResponseDTO(final long id, final String systemName, final String fileName, final String contentType, final String data, final String createdAt, final String upDatedAt) {
         this.id = id;
-        this.systemName = "systemName";
-        this.fileName = "hej.conf";
-        this.contentType = "text/plain";
-        this.data = "data";
-		this.createdAt = "createdAt";
-		this.updatedAt = "upDatedAt";
+        this.systemName = systemName;
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.data = data;
+		this.createdAt = createdAt;
+		this.updatedAt = upDatedAt;
 	}
     
     //-------------------------------------------------------------------------------------------------
@@ -96,7 +84,7 @@ public class ConfigurationResponseDTO implements Serializable {
                 .add("systemName=" + systemName)
                 .add("fileName=" + fileName)
                 .add("contentType=" + contentType)
-                .add("data=" +data)
+                .add("data=" + data)
                 .add("createdAt='" + createdAt + "'")
 				.add("updatedAt='" + updatedAt + "'")
 				.toString();

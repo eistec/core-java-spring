@@ -89,16 +89,17 @@ public class ConfigurationDBService {
 			stmt.setString(1, systemName);
 	
 			ResultSet rs = stmt.executeQuery();
-			ret = new ConfigurationResponseDTO();
 			
 			// fetch the information
-			rs.next();
-			ret.setId(rs.getLong(1));
-			ret.setSystemName(systemName);
-			ret.setContentType(rs.getString(2));
-			ret.setData(rs.getString(3));
-			ret.setCreatedAt(rs.getString(4));
-			ret.setUpdatedAt(rs.getString(5));
+			if (rs.next()) {
+				ret = new ConfigurationResponseDTO();
+				ret.setId(rs.getLong(1));
+				ret.setSystemName(systemName);
+				ret.setContentType(rs.getString(2));
+				ret.setData(rs.getString(3));
+				ret.setCreatedAt(rs.getString(4));
+				ret.setUpdatedAt(rs.getString(5));
+			}
 			
 			rs.close();
 			stmt.close();

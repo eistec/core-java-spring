@@ -1,6 +1,8 @@
 package eu.arrowhead.core.configuration;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
+import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
+import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
@@ -43,6 +45,20 @@ public class ConfigurationControllerSystemTest {
 
     //=================================================================================================
     // test data
+    private final static String DATE_STRING = "2021-01-26T13:22:45";
+
+    private final static long VALID_CONFIG_ID = 1L;
+
+    private final static String VALID_SYSTEM_NAME = "system";
+    private final static String UNKNOWN_SYSTEM_NAME = "unknown";
+    private final static String INVALID_SYSTEM_NAME = "";
+
+    private final static String VALID_DATA = "c2VydmVySVA9MTAuOC4wLjEwMA==";
+    private final static String VALID_RAWDATA = "serverIP=10.8.0.100";
+
+    private final static ConfigurationResponseDTO VALID_CONF =
+            new ConfigurationResponseDTO(VALID_CONFIG_ID, VALID_SYSTEM_NAME, "myconf.cfg", "text/plain",
+                                          VALID_DATA, DATE_STRING, DATE_STRING);
 
     //=================================================================================================
     // members
@@ -82,6 +98,40 @@ public class ConfigurationControllerSystemTest {
                                                .andExpect(status().isOk())
                                                .andReturn();
         assertEquals("Got it!", response.getResponse().getContentAsString());
+    }
+
+    @Test
+    public void getConfigurationEntry() throws Exception {
+        when(configurationDBService.getConfigForSystem(any())).thenReturn(VALID_CONF);
+
+        final MvcResult response = this.mockMvc.perform(get("/configuration/conf/" + VALID_SYSTEM_NAME)
+                                               .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+
+        final ConfigurationResponseDTO responseBody = readResponse(response, ConfigurationResponseDTO.class);
+        assertEquals(1, responseBody.getId());
+    }
+
+    @Test
+    public void getRawConfigurationEntry() throws Exception {
+        when(configurationDBService.getConfigForSystem(any())).thenReturn(VALID_CONF);
+
+        final MvcResult response = this.mockMvc.perform(get("/configuration/rawconf/" + VALID_SYSTEM_NAME)
+                                               .accept(MediaType.TEXT_PLAIN))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+
+        final String responseText = response.getResponse().getContentAsString();
+        assertEquals(VALID_RAWDATA, responseText);
+    }
+
+
+    //=================================================================================================
+    // Tests of Configuration system
+
+    private <T> T readResponse(final MvcResult result, final Class<T> clz) throws IOException {
+        return objectMapper.readValue(result.getResponse().getContentAsString(), clz);
     }
 
 }
