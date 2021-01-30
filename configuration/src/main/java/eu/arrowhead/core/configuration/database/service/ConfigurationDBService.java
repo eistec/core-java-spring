@@ -174,12 +174,8 @@ public class ConfigurationDBService {
 			PreparedStatement stmt = conn.prepareStatement(sql);
 			stmt.setString(1, systemName);
 
-			int results = stmt.executeUpdate();
+			stmt.executeUpdate();
 			stmt.close();
-
-			if (results == 0) {
-				ret = null;
-			}
 
 		} catch (SQLException e) {
 			logger.debug(e.toString());

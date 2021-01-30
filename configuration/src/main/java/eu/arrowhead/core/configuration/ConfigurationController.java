@@ -54,6 +54,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
+import eu.arrowhead.common.dto.shared.ConfigurationSystemsListResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
 import eu.arrowhead.common.exception.DataNotFoundException;
@@ -161,6 +162,24 @@ public class ConfigurationController {
 			
 			return ret;
 	}
+
+	//-------------------------------------------------------------------------------------------------
+	@ApiOperation(value = "Interface to list all configuration files", response = ConfigurationSystemsListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiResponses (value = {
+			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_NOT_FOUND, message = CoreCommonConstants.SWAGGER_HTTP_404_MESSAGE),
+			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
+	})
+	@GetMapping(path=CONFIG_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
+	@ResponseBody public ConfigurationSystemsListResponseDTO confListGet(
+			) {
+				logger.debug("confList");
+
+				ConfigurationSystemsListResponseDTO ret = new ConfigurationSystemsListResponseDTO();
+
+				return ret;
+			}
 
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Store new configuration", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })

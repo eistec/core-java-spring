@@ -78,6 +78,7 @@ public class CommonConstants {
 	public static final String CORE_SERVICE_DATAMANAGER_HISTORIAN = "historian";
 
 	public static final String CORE_SERVICE_CONFIGURATION_CONF = "conf";
+	public static final String CORE_SERVICE_CONFIGURATION_RAWCONF = "confraw";
 
 	public static final String CORE_SERVICE_CHOREOGRAPHER_PROCESS = "choreographer-service";
 
@@ -225,7 +226,7 @@ public class CommonConstants {
 	public static final String CONFIGURATION_URI = "/configuration";
 	public static final String OP_CONFIGURATION_CONF = "/conf";
 	public static final String OP_CONFIGURATION_RAWCONF = "/rawconf";
-	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/manage";
+	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/manage";
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";
@@ -274,7 +275,8 @@ public class CommonConstants {
 	
 	public static final List<CoreSystemService> PUBLIC_CORE_SYSTEM_SERVICES = List.of(CoreSystemService.ORCHESTRATION_SERVICE, CoreSystemService.AUTH_PUBLIC_KEY_SERVICE,
   			  																		  CoreSystemService.EVENT_PUBLISH_SERVICE, CoreSystemService.EVENT_SUBSCRIBE_SERVICE, CoreSystemService.EVENT_UNSUBSCRIBE_SERVICE, 
-																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE);
+																					  CoreSystemService.PROXY_SERVICE, CoreSystemService.HISTORIAN_SERVICE, CoreSystemService.CHOREOGRAPHER_SERVICE, CoreSystemService.TRANSLATOR_SERVICE,
+																					  CoreSystemService.CONFIGURATION_SERVICE, CoreSystemService.CONFIGURATION_RAW_SERVICE);
 	
 	public static final String HTTP_CLIENT_CONNECTION_TIMEOUT = "http.client.connection.timeout";
 	public static final String $HTTP_CLIENT_CONNECTION_TIMEOUT_WD = "${" + HTTP_CLIENT_CONNECTION_TIMEOUT + ":" + Defaults.DEFAULT_CONNECTION_TIMEOUT + "}";

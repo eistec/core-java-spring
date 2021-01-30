@@ -47,21 +47,16 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
 		super.checkClientAuthorized(clientCN, method, requestTarget, requestJSON, queryParams);
 
                 final String cloudCN = getServerCloudCN();
+                System.out.println("target:" + requestTarget);
 
-		if (requestTarget.equals(CommonConstants.CONFIGURATION_URI + CommonConstants.ECHO_URI)) {
-			// Everybody in the local cloud can test the server => no further check is necessary
-                } else if (requestTarget.endsWith("/favicon.ico")) {
-                        // ok
-                } else if ( requestTarget.contains( CoreCommonConstants.MGMT_URI ) ) {
+                if (requestTarget.contains(CoreCommonConstants.MGMT_URI)) {
 			// Only the local System Operator can use these methods
-                        checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
-                } else if (requestTarget.contains(CommonConstants.OP_CONFIGURATION_CONF) || requestTarget.contains(CommonConstants.OP_CONFIGURATION_RAWCONF)) {
+			checkIfLocalSystemOperator(clientCN, cloudCN, requestTarget);
+                } else if (requestTarget.contains(CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_CONF) || requestTarget.contains(CommonConstants.CONFIGURATION_URI + CommonConstants.OP_CONFIGURATION_RAWCONF)) {
                         final String client = getSystemNameFromURI(requestTarget);
-                
-			checkIfRequesterSystemNameisEqualsWithClientNameFromCN(client, clientCN);
-                } else {
-                        throw new AuthException("Illegal request", HttpStatus.UNAUTHORIZED.value());
-                }
+                        System.out.println("target:" + requestTarget + ", client: " + client);
+                        checkIfRequesterSystemNameisEqualsWithClientNameFromCN(client, clientCN);
+                }		
 
 	}
 
@@ -89,8 +84,6 @@ public class ConfigurationAccessControlFilter extends CoreSystemAccessControlFil
                         throw new AuthException("Illegal request", HttpStatus.UNAUTHORIZED.value());
                 }
 
-
-                //return null;
         }
 	//-------------------------------------------------------------------------------------------------
         private void checkIfRequesterSystemNameisEqualsWithClientNameFromCN(final String requesterSystemName, final String clientCN) {
