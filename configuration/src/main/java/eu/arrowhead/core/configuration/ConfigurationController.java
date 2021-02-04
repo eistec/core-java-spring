@@ -18,6 +18,7 @@ import java.util.ArrayList;
 import java.util.Vector;
 import java.util.Iterator;
 import java.util.Base64;
+import java.security.MessageDigest;
 
 import org.apache.http.HttpStatus;
 import org.apache.logging.log4j.LogManager;
