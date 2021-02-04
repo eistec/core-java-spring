@@ -3,6 +3,7 @@ package eu.arrowhead.core.configuration;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
+import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
 
 import eu.arrowhead.common.exception.InvalidParameterException;
 import eu.arrowhead.core.configuration.database.service.ConfigurationDBService;
@@ -21,6 +22,7 @@ import org.springframework.test.web.servlet.setup.MockMvcBuilders;
 import org.springframework.web.context.WebApplicationContext;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.Assert.assertEquals;
@@ -56,9 +58,9 @@ public class ConfigurationControllerSystemTest {
     private final static String VALID_DATA = "c2VydmVySVA9MTAuOC4wLjEwMA==";
     private final static String VALID_RAWDATA = "serverIP=10.8.0.100";
 
-    private final static ConfigurationResponseDTO VALID_CONF =
-            new ConfigurationResponseDTO(VALID_CONFIG_ID, VALID_SYSTEM_NAME, "myconf.cfg", "text/plain",
-                                          VALID_DATA, DATE_STRING, DATE_STRING);
+    private final static ConfigurationResponseDTO VALID_CONF = new ConfigurationResponseDTO(VALID_CONFIG_ID, VALID_SYSTEM_NAME, "myconf.cfg", "text/plain", VALID_DATA, DATE_STRING, DATE_STRING);
+    private final static List<ConfigurationResponseDTO> EMPTY_CONF_LIST = new ArrayList<ConfigurationResponseDTO>();
+    private final static ConfigurationListResponseDTO EMPTY_CONF_RESP = new ConfigurationListResponseDTO();
 
     //=================================================================================================
     // members
@@ -124,6 +126,20 @@ public class ConfigurationControllerSystemTest {
 
         final String responseText = response.getResponse().getContentAsString();
         assertEquals(VALID_RAWDATA, responseText);
+    }
+
+    @Test
+    public void listConfigurations() throws Exception {
+        when(configurationDBService.getAllConfigurations()).thenReturn(EMPTY_CONF_RESP);
+
+        final MvcResult response = this.mockMvc.perform(get("/configuration/mgmt/config")
+                                               .accept(MediaType.APPLICATION_JSON))
+                                               .andExpect(status().isOk())
+                                               .andReturn();
+        
+        final ConfigurationListResponseDTO responseBody = readResponse(response, ConfigurationListResponseDTO.class);
+        assertEquals(responseBody.getCount(), 0);
+        assertEquals(responseBody.getData().size(), 0);
     }
 
 
