@@ -38,6 +38,7 @@ public class ConfigurationRequestDTO implements Serializable {
     private String fileName;
     private String contentType;
     private String data;
+    //private String md5;
     
     //=================================================================================================
 	// methods
