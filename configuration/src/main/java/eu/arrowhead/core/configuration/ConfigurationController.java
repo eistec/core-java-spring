@@ -54,6 +54,7 @@ import eu.arrowhead.common.Defaults;
 import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
+import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationSystemsListResponseDTO;
 import eu.arrowhead.common.exception.ArrowheadException;
 import eu.arrowhead.common.exception.BadPayloadException;
@@ -105,7 +106,6 @@ public class ConfigurationController {
 	@ResponseBody public String echoService() {
 		return "Got it!";
 	}
-	
 	
 	//-------------------------------------------------------------------------------------------------
 	@ApiOperation(value = "Interface to get a configuration file", response = ConfigurationResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_CLIENT })
@@ -164,7 +164,7 @@ public class ConfigurationController {
 	}
 
 	//-------------------------------------------------------------------------------------------------
-	@ApiOperation(value = "Interface to list all configuration files", response = ConfigurationSystemsListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
+	@ApiOperation(value = "Interface to list all configuration files", response = ConfigurationListResponseDTO.class, tags = { CoreCommonConstants.SWAGGER_TAG_MGMT })
 	@ApiResponses (value = {
 			@ApiResponse(code = HttpStatus.SC_OK, message = CoreCommonConstants.SWAGGER_HTTP_200_MESSAGE),
 			@ApiResponse(code = HttpStatus.SC_UNAUTHORIZED, message = CoreCommonConstants.SWAGGER_HTTP_401_MESSAGE),
@@ -172,11 +172,11 @@ public class ConfigurationController {
 			@ApiResponse(code = HttpStatus.SC_INTERNAL_SERVER_ERROR, message = CoreCommonConstants.SWAGGER_HTTP_500_MESSAGE)
 	})
 	@GetMapping(path=CONFIG_MGMT_URI, produces = MediaType.APPLICATION_JSON_VALUE)
-	@ResponseBody public ConfigurationSystemsListResponseDTO confListGet(
+	@ResponseBody public ConfigurationListResponseDTO confListGet(
 			) {
 				logger.debug("confList");
 
-				ConfigurationSystemsListResponseDTO ret = new ConfigurationSystemsListResponseDTO();
+				ConfigurationListResponseDTO ret = configurationDBService.getAllConfigurations();
 
 				return ret;
 			}

@@ -29,6 +29,7 @@ import org.springframework.stereotype.Service;
 
 import eu.arrowhead.common.CommonConstants;
 import eu.arrowhead.common.CoreCommonConstants;
+import eu.arrowhead.common.dto.shared.ConfigurationListResponseDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationRequestDTO;
 import eu.arrowhead.common.dto.shared.ConfigurationResponseDTO;
 import eu.arrowhead.common.Utilities;
@@ -154,6 +155,53 @@ public class ConfigurationDBService {
 		}
 
 		return getConfigForSystem(systemName);
+	}
+
+	//-------------------------------------------------------------------------------------------------
+	public ConfigurationListResponseDTO getAllConfigurations() {
+		logger.debug("getAllConfigurations:");
+
+		ConfigurationListResponseDTO ret = new ConfigurationListResponseDTO();
+
+		Connection conn = null;
+		try {
+			conn = getConnection();
+
+			String sql = "SELECT id, systemName, contentType, data, created_at, updated_at FROM configuration_data;";
+			PreparedStatement stmt = conn.prepareStatement(sql);
+	
+			ResultSet rs = stmt.executeQuery();
+			
+			List<ConfigurationResponseDTO> data = new ArrayList<ConfigurationResponseDTO>();
+			// fetch the information
+			if (rs.next()) {
+				ConfigurationResponseDTO entry = new ConfigurationResponseDTO();
+				entry.setId(rs.getLong(1));
+				entry.setSystemName(rs.getString(2));
+				entry.setContentType(rs.getString(3));
+				entry.setData(rs.getString(4));
+				entry.setCreatedAt(rs.getString(5));
+				entry.setUpdatedAt(rs.getString(6));
+				data.add(entry);
+			}
+			ret.setData(data);
+			ret.setCount(data.size());
+			
+			rs.close();
+			stmt.close();
+
+		} catch (SQLException e) {
+			logger.debug(e.toString());
+			throw new ArrowheadException(CoreCommonConstants.DATABASE_OPERATION_EXCEPTION_MSG);
+		} finally {
+			try {
+				closeConnection(conn);
+			} catch (SQLException e) {
+				logger.debug(e.toString());
+			}
+			
+		}
+		return ret;
 	}
 
 	//-------------------------------------------------------------------------------------------------
