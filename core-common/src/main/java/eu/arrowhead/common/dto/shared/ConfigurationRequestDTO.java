@@ -15,12 +15,9 @@
 package eu.arrowhead.common.dto.shared;
 
 import java.io.Serializable;
-import java.util.ArrayList;
-//import java.util.Arrays;
-//import java.util.HashMap;
-//import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+//import java.util.ArrayList;
+//import java.util.List;
+//import java.util.Map;
 
 //import org.springframework.util.Assert;
 
@@ -47,18 +44,14 @@ public class ConfigurationRequestDTO implements Serializable {
 	
 	//-------------------------------------------------------------------------------------------------	
     public ConfigurationRequestDTO() {
-        this.systemName = "systemName";
-        this.fileName = "hej.conf";
-        this.contentType = "text/plain";
-        this.data = "data";
     }
 
     //-------------------------------------------------------------------------------------------------
 	public ConfigurationRequestDTO(final String systemName, final String fileName, final String contentType, final String data) {
-        this.systemName = "systemName";
-        this.fileName = "hej.conf";
-        this.contentType = "text/plain";
-        this.data = "data";
+        this.systemName = systemName;
+        this.fileName = fileName;
+        this.contentType = contentType;
+        this.data = data;
 	}
     
     //-------------------------------------------------------------------------------------------------
