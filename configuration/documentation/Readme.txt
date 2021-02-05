@@ -1,4 +1,4 @@
 File list:
 
-Arrowhead Configuration SysD.pdf - Configuration System design 
+configuration_sd.pdf - Configuration Service description
 Readme.txt - This file
