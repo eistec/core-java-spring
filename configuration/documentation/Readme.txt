@@ -1,4 +1,5 @@
 File list:
 
-configuration_sd.pdf - Configuration Service description
+config_sd.pdf - Configuration Service description
+configuration_sysd.pdf - Configuration System design description
 Readme.txt - This file
