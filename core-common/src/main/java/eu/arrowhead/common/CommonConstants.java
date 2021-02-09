@@ -224,9 +224,9 @@ public class CommonConstants {
 	public static final String OP_GATEKEEPER_GET_CLOUD_SERVICE_SUFFIX = "{operator}/{name}";
 
 	public static final String CONFIGURATION_URI = "/configuration";
-	public static final String OP_CONFIGURATION_CONF = "/conf";
-	public static final String OP_CONFIGURATION_RAWCONF = "/rawconf";
-	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/manage";
+	public static final String OP_CONFIGURATION_CONF = "/config";
+	public static final String OP_CONFIGURATION_RAWCONF = "/config/raw";
+	public static final String OP_CONFIGURATION_MGMT_MANAGE = "/mgmt/config"; 
 
 	public static final String CHOREOGRAPHER_URI = "/choreographer";
 	public static final String OP_CHOREOGRAPHER_NOTIFY_STEP_DONE = "/notifyStepDone";
