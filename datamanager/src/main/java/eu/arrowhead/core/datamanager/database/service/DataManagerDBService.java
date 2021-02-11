@@ -258,7 +258,7 @@ public class DataManagerDBService {
 	  Connection conn = null;
 	  try {
 	    conn = getConnection();
-      conn.setAutoCommit(false);
+      	conn.setAutoCommit(false);
 	    int sid = serviceToID(systemName, serviceName, conn);
 	    if (sid != -1) {
 	      String sql = "INSERT INTO dmhist_messages(sid, bt, mint, maxt, msg) VALUES(?, ?, ?, ?, ?)";

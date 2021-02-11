@@ -80,6 +80,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 
             Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
             dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
+            historianService.createEndpoint(systemName, serviceName);
 
             SenML head = sml.firstElement();
             if(head.getBt() == null) {
