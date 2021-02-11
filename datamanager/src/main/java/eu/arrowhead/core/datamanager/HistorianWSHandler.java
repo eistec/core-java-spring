@@ -91,7 +91,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             dataManagerDriver.validateSenMLContent(sml);
 
             final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
-            System.out.println("statusCode: " + statusCode);
+            logger.debug("statusCode: " + statusCode);
         } catch(Exception e) {
             System.out.println("got incorrect payload:" + e.toString());
             logger.debug("got incorrect payload");
