@@ -18,6 +18,7 @@ import eu.arrowhead.common.CoreCommonConstants;
 import eu.arrowhead.common.SecurityUtilities;
 import eu.arrowhead.common.dto.shared.CertificateType;
 import eu.arrowhead.common.security.CoreSystemAccessControlFilter;
+import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
@@ -31,6 +32,7 @@ import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
 
 import java.util.Map;
+import java.net.URI;
 
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
@@ -39,6 +41,9 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 	//=================================================================================================
         // members
         
+	@Autowired
+	private DatamanagerACLFilter datamanagerACLfilter;
+
 	//=================================================================================================
 	// assistant methods
 
@@ -52,10 +57,27 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
 		if (requestTarget.endsWith(CommonConstants.DATAMANAGER_URI + CommonConstants.ECHO_URI)) {
                         // Everybody in the local cloud can test the server => no further check is necessary
                         return;
-		} 
+		}
+
+		/* check ACL for {historian/proxy}/system/service */
+		try {
+                  URI uri = new URI(requestTarget);
+                  if (!(uri.getPath().equals(CommonConstants.DATAMANAGER_URI) || uri.getPath().equals(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY) || uri.getPath().equals(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN))) {
+
+		        if(datamanagerACLfilter.checkRequest(clientCN, method, requestTarget)) {
+                                logger.debug("Authorized");
+		        } else {
+                                logger.debug("Unauthorized!");
+                                throw new AuthException("Not authorized");
+                        }
+                  }
+		} catch(Exception e) {
+		  throw new AuthException("Error during authorization");
+		}
+
 
                 // only the system named $SysName is allowed to write to <historian or proxy>/$SysName/$SrvName
-                if (!method.toLowerCase().equals("get")) {
+                /*if (!method.toLowerCase().equals("get")) {
                         final String dataManagerHistorianURI = CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN+"/";
                         int sysNameStartPosition = requestTarget.indexOf(dataManagerHistorianURI);
                         int sysNameStopPosition = -1;
@@ -78,7 +100,7 @@ public class DatamanagerAccessControlFilter extends CoreSystemAccessControlFilte
                         } else {
                                 throw new AuthException("Illegal request");
                         }
-                }
+                }*/
 
 	}
 
