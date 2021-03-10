@@ -18,6 +18,7 @@ import java.util.Map;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import eu.arrowhead.core.datamanager.HistorianWSHandler;
+import eu.arrowhead.core.datamanager.security.DatamanagerACLFilter;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,18 +44,24 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
 	private static final Logger logger = LogManager.getLogger(WebSocketConfig.class);
  
+    @Value("${server.ssl.enabled}")
+    private boolean sslEnabled;
+
     @Value("${websockets.enabled}")
     private boolean websocketsEnabled;
 
     @Autowired
     HistorianWSHandler historianWSHandler;
 
+    @Autowired
+    DatamanagerACLFilter dmACLFilter;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
-            if (websocketsEnabled) {
-                logger.info("WebSockets is enabled, initializing...");
-                webSocketHandlerRegistry.addHandler(historianWSHandler, "/ws/datamanager/historian/*/*").addInterceptors(historianInterceptor());
-            }
+        if (websocketsEnabled) {
+            logger.info("WebSockets is enabled, initializing...");
+            webSocketHandlerRegistry.addHandler(historianWSHandler, "/ws/datamanager/historian/*/*").addInterceptors(historianInterceptor());
+        }
     }
 
     @Bean
@@ -65,12 +72,18 @@ public class WebSocketConfig implements WebSocketConfigurer {
 
                 // Get the URI segment corresponding to the endpoints during handshake
                 String path = request.getURI().getPath();
-                //System.out.println("PATH: " + path);
+                System.out.println("PATH: " + path);
                 final String serviceName = path.substring(path.lastIndexOf('/') + 1);
                 path = path.substring(0, path.lastIndexOf('/'));
                 final String systemName = path.substring(path.lastIndexOf('/') + 1);
 
-                logger.debug("Target: " + systemName + "/" + serviceName);
+                System.out.println("System: " + systemName);
+                System.out.println("Service: " + serviceName);
+
+                // if running in secure mode, check authorization (ACL)
+                if(sslEnabled) {
+                    logger.debug("SSl is enabled!");
+                }
 
                 // This will be added to the websocket session
                 String CN = ""; //XXX add me when using TLS

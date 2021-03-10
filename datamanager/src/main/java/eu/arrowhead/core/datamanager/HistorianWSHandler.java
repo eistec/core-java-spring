@@ -76,7 +76,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             systemName = (String) session.getAttributes().get("systemName");
             serviceName = (String) session.getAttributes().get("serviceName");
             payload = message.getPayload();
-            logger.debug("Got message from {}/{}", systemName, serviceName);
+            logger.debug("Got message from '{}/{}'", systemName, serviceName);
 
             Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
             dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
