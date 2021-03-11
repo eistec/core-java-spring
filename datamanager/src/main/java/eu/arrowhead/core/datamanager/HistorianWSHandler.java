@@ -33,7 +33,7 @@ import eu.arrowhead.core.datamanager.service.DataManagerDriver;
 //import eu.arrowhead.core.datamanager.database.service.DataManagerDBService;
 import eu.arrowhead.common.dto.shared.SenML;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
 @Component
@@ -71,13 +71,15 @@ public class HistorianWSHandler extends TextWebSocketHandler {
     @Override
     protected void handleTextMessage(WebSocketSession session, TextMessage message) throws Exception {
         super.handleTextMessage(session, message);
-        String systemName, serviceName, payload;
+        String systemName;
+        String serviceName;
+        String payload;
 
         try {
             systemName = (String) session.getAttributes().get("systemName");
             serviceName = (String) session.getAttributes().get("serviceName");
             payload = message.getPayload();
-            logger.debug("Got message from '{}/{}'", systemName, serviceName);
+            //logger.debug("Got message from '{}/{}'", systemName, serviceName);
 
             final Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
             dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
@@ -87,11 +89,10 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             if(head.getBt() == null) {
                 head.setBt((double)System.currentTimeMillis() / 1000);
             }
-            System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
+            //System.out.println("bn: " + sml.get(0).getBn() + ", bt: " + sml.get(0).getBt());
 
             dataManagerDriver.validateSenMLContent(sml);
-
-            final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
+            historianService.updateEndpoint(systemName, serviceName, sml);
             
         } catch(Exception e) {
             logger.debug("Got incorrect payload");
@@ -100,13 +101,19 @@ public class HistorianWSHandler extends TextWebSocketHandler {
 
         }
 
-        System.out.println("Incoming: #\n" + payload + "\n# from " + systemName + "/" + serviceName);
+        //System.out.println("Incoming: #\n" + payload + "\n# from " + systemName + "/" + serviceName);
         sessions.forEach(webSocketSession -> {
             try {
-                webSocketSession.sendMessage(message); //XXX: only send to sessions that are connected to the system+service combo!!
+                if ( ((String)webSocketSession.getAttributes().get("systemName")).equals(systemName) && ((String)webSocketSession.getAttributes().get("serviceName")).equals(serviceName) ) {
+                    webSocketSession.sendMessage(message);
+                }
             } catch (IOException e) {
                 logger.error("Error occurred.", e);
             }
         });
     }
+
+    //=================================================================================================
+    // assistant methods
+
 }
