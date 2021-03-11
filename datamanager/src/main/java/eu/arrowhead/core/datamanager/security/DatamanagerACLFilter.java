@@ -53,45 +53,40 @@ public class DatamanagerACLFilter {
     @Value("${acl.file}")
     private String aclFileName;
 
-    ArrayList<AclRule> rules = null;
+    ArrayList<AclRule> rules;
 
     //=================================================================================================
     // members
-        
-    //=================================================================================================
-    // assistant methods
 
     public DatamanagerACLFilter() {
-        
+        rules = null
     }
 
+    //-------------------------------------------------------------------------------------------------
     @PostConstruct
     public void init() {
-        System.out.println("ACL file name: " + aclFileName);
-        boolean res = loadFile(aclFileName);
-        if(res==false) {
-            logger.debug("Could not load ACL file!");
+        logger.debug("ACL file name: {}", aclFileName);
+
+        if( !loadFile(aclFileName) ) {
+            logger.debug("Could not load ACL file!\nExiting...");
             
             int exitCode = 0;
             SpringApplication.exit(context, () -> exitCode);
             System.exit(exitCode);
         }
     }
-
+    
+    //=================================================================================================
+    // assistant methods
 
     //-------------------------------------------------------------------------------------------------
     public boolean checkRequest(final String systemCN, final String operation, final String path) throws Exception {
-
-        System.out.println("\n\nsystemname: "+  systemCN+ " path: " + path);
-        System.out.println("method: " + operation);
-
         String endPath = "";
-        if (path.contains("/datamanager/historian")) {
-            endPath = path.substring(path.indexOf("/datamanager/historian") + 23);
-        } else if (path.contains("datamanager/proxy")){
-            endPath = path.substring(path.indexOf("/datamanager/proxy")+ 19);
+        if (path.contains(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN)) {
+            endPath = path.substring(path.indexOf(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_HISTORIAN) + 23);
+        } else if (path.contains(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY)){
+            endPath = path.substring(path.indexOf(CommonConstants.DATAMANAGER_URI + CommonConstants.OP_DATAMANAGER_PROXY)+ 19);
         }
-        System.out.println("End of path is: " + endPath);
 
         final String[] targetPath = endPath.split("/");
         String op = "";
@@ -99,19 +94,15 @@ public class DatamanagerACLFilter {
         switch(operation.trim()) { //XXX fixme
             case "GET":
                 op = "g";
-                System.out.println("op is g");
                 break;
             case "PUT":
                 op ="p";
-                System.out.println("op is p");
                 break;
             case "POST":
                 op ="P";
-                System.out.println("op is P");
                 break;
             case "DELETE":
                 op ="d";
-                System.out.println("op is d");
                 break;
             default:
                 throw new AuthException("Unknown method");
@@ -122,52 +113,52 @@ public class DatamanagerACLFilter {
 
             // only check rules that matches systemName or $SYS constant
             if(rule.systemName.equals(systemCN)) {
-                System.out.println("Found matching system name: " + rule.systemName);
+                //logger.debug("Found matching system name: " + rule.systemName);
 
                 for(AclEntry acl: rule.acls) {
-                    System.out.println("ACL-path: " + acl.path);
+                    //System.out.println("ACL-path: " + acl.path);
                     final String[] pathParts = acl.path.split("/");
                     final String pathSystem = pathParts[0].trim();
                     final String pathService = pathParts[1].trim();
 
                     // check hard coded rule
                     if(acl.path.equals(endPath)) {
-                        System.out.println("Found matching path: " + endPath);
+                        //System.out.println("Found matching path: " + endPath);
                         if(acl.operations.contains(op)) {
-                            System.out.println("\tFound allowed operation0: " + operation);
+                            //System.out.println("\tFound allowed operation0: " + operation);
                             return true;
                         }
                     } else if(pathSystem.equals(targetPath[0]) && pathService.equals("*")) { // match aname/*
                         if(acl.operations.contains(op)) {
-                            System.out.println("\tFound allowed operation1: " + operation);
+                            //System.out.println("\tFound allowed operation1: " + operation);
                             return true;
                         }
                     } else if(pathSystem.equals("*") && pathService.equals("*")) { // match */*
                         if(acl.operations.contains(op)) {
-                            System.out.println("\tFound allowed operation2: " + operation);
+                            //System.out.println("\tFound allowed operation2: " + operation);
                             return true;
                         }
                     } else {
-                        System.out.println("No match for endpath: " + endPath + " for rule: " + acl.path + " ops: " + acl.operations);
+                        //System.out.println("No match for endpath: " + endPath + " for rule: " + acl.path + " ops: " + acl.operations);
                     }
 
                 }
             } else if(rule.systemName.equals("$SYS")) {
-                System.out.println("Found matching system name: $SYS(" + systemCN + ")");
+                logger.debug("Found matching system name: $SYS:{}", systemCN);
 
                 for(AclEntry acl: rule.acls) {
-                    System.out.println("ACL-path: " + acl.path);
+                    //System.out.println("ACL-path: " + acl.path);
                     final String[] pathParts = acl.path.split("/");
                     final String pathSystem = pathParts[0].trim();
                     final String pathService = pathParts[1].trim();
 
-                    System.out.println("pathSystem: " + pathSystem);
-                    System.out.println("pathService: " + pathService);
-                    System.out.println("targetPath[1]: " + targetPath[1]);
+                    //System.out.println("pathSystem: " + pathSystem);
+                    //System.out.println("pathService: " + pathService);
+                    //System.out.println("targetPath[1]: " + targetPath[1]);
 
                     if((pathSystem.equals("$SYS") && targetPath[0].equals(systemCN)) && (pathService.equals("*") || pathService.equals(targetPath[1]))) {
                         if(acl.operations.contains(op)) {
-                            System.out.println("\tFound allowed operationS0: " + operation);
+                            //System.out.println("\tFound allowed operationS0: " + operation);
                             return true;
                         }
                     }
@@ -189,10 +180,10 @@ public class DatamanagerACLFilter {
                     continue;
                 }
 
-                System.out.println(line);
+                //logger.debug(line);
                 String[] parts = line.split(":");
-                System.out.println("\tSystem is " + parts[0].trim());
-                System.out.println("\tRule is " + parts[1].trim());
+                //logger.debug("System is " + parts[0].trim());
+                //logger.debug("Rule is " + parts[1].trim());
 
                 final AclRule r  = new AclRule(parts[0].trim());
                 final String rulesData[] = parts[1].trim().split(",");
@@ -204,9 +195,8 @@ public class DatamanagerACLFilter {
             }
 
         } catch(Exception e) {
-            System.out.println("Misformad ACL file!");
+            logger.debug("Misformad ACL file!");
             rules = new ArrayList<AclRule>();
-
             return false;
         }
         return true;
@@ -218,41 +208,52 @@ public class DatamanagerACLFilter {
         final ArrayList<String> lines = new ArrayList<String>();
 
         try {
-            Scanner myReader = new Scanner(new File(filename));
-            while (myReader.hasNextLine()) {
-              String line = myReader.nextLine().trim();
+            Scanner reader = new Scanner(new File(filename));
+            while (reader.hasNextLine()) {
+              String line = reader.nextLine().trim();
               lines.add(line);
             }
-            myReader.close();
+            reader.close();
 
             return load(lines.toArray(new String[lines.size()]));
 
         } catch (FileNotFoundException e) {
             logger.debug("Could not load ACL file!");
             e.printStackTrace();
+            return false;
         }
-        return false;
+       
     }
 
-    class AclEntry {
+    //=================================================================================================
+    private class AclEntry {
         String operations;
         String path;
 
+        //-------------------------------------------------------------------------------------------------
         public AclEntry() {
 
         }
+
+        //-------------------------------------------------------------------------------------------------
+        public AclEntry(final String operations, final String path) {
+            this.operations = operations;
+            this.path = path;
+        }
     }
 
-    class AclRule {
+    //=================================================================================================
+    private class AclRule {
         String systemName;
         ArrayList<AclEntry> acls = new ArrayList<AclEntry>();
 
         
+        //-------------------------------------------------------------------------------------------------
         public AclRule(final String systemName){
             this.systemName = systemName;
         }
 
-
+        //-------------------------------------------------------------------------------------------------
         private void addACLEntries(final String entryString) throws Exception{
             final String[] parts = entryString.split(",");
 
@@ -262,14 +263,13 @@ public class DatamanagerACLFilter {
             
         }
 
-        
+        //-------------------------------------------------------------------------------------------------
         private void addACLEntry(final String entryString) throws Exception {
-            System.out.println("\t\t<" + entryString.trim() + ">");
-            String[] parts = entryString.split("@");
+            final String[] parts = entryString.split("@");
             final String operations = parts[0].trim().toLowerCase();
             final String path = parts[1].trim();
 
-            // validate CRUD only operations
+            /* validate CRUD operations */
             for (int i = 0; i < operations.length(); i++) {
                 String op = "" + operations.charAt(i);
                 if("gpPd".indexOf(op) == -1) {
