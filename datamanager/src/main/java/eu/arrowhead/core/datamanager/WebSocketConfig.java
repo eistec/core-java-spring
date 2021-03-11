@@ -53,14 +53,16 @@ public class WebSocketConfig implements WebSocketConfigurer {
     @Autowired
     HistorianWSHandler historianWSHandler;
 
-    @Autowired
-    DatamanagerACLFilter dmACLFilter;
+    //@Autowired(required=false)
+    //DatamanagerACLFilter dmACLFilter;
 
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
         if (websocketsEnabled) {
             logger.info("WebSockets is enabled, initializing...");
             webSocketHandlerRegistry.addHandler(historianWSHandler, "/ws/datamanager/historian/*/*").addInterceptors(historianInterceptor());
+        } else {
+            logger.info("WebSockets is disabled");
         }
     }
 
