@@ -1,5 +1,5 @@
 /********************************************************************************
- * Copyright (c) 2020 {Lulea University of Technology}
+ * Copyright (c) 2021 {Lulea University of Technology}
  *
  * This program and the accompanying materials are made available under the
  * terms of the Eclipse Public License 2.0 which is available at
@@ -22,10 +22,10 @@ import java.util.ArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import eu.arrowhead.common.CommonConstants;
-import eu.arrowhead.common.CoreCommonConstants;
+//import eu.arrowhead.common.CoreCommonConstants;
 import org.springframework.beans.factory.annotation.Value;
-import eu.arrowhead.common.SecurityUtilities;
-import eu.arrowhead.common.dto.shared.CertificateType;
+//import eu.arrowhead.common.SecurityUtilities;
+//import eu.arrowhead.common.dto.shared.CertificateType;
 import org.springframework.beans.factory.annotation.Autowired;
 import javax.annotation.PostConstruct;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -33,10 +33,10 @@ import org.springframework.stereotype.Component;
 import org.springframework.context.ApplicationContext;
 import org.springframework.boot.SpringApplication;
 
-import org.springframework.http.HttpStatus;
-import org.springframework.stereotype.Component;
+//import org.springframework.http.HttpStatus;
+//import org.springframework.stereotype.Component;
 
-import eu.arrowhead.common.Utilities;
+//import eu.arrowhead.common.Utilities;
 import eu.arrowhead.common.exception.AuthException;
 
 import java.util.Map;
@@ -44,6 +44,9 @@ import java.util.Map;
 @Component
 @ConditionalOnProperty(name = CommonConstants.SERVER_SSL_ENABLED, matchIfMissing = true) 
 public class DatamanagerACLFilter {
+
+    //=================================================================================================
+	// members
 
     private final Logger logger = LogManager.getLogger(DatamanagerACLFilter.class);
 
@@ -56,10 +59,10 @@ public class DatamanagerACLFilter {
     ArrayList<AclRule> rules;
 
     //=================================================================================================
-    // members
+    // methods
 
     public DatamanagerACLFilter() {
-        rules = null
+        rules = null;
     }
 
     //-------------------------------------------------------------------------------------------------
@@ -89,7 +92,7 @@ public class DatamanagerACLFilter {
         }
 
         final String[] targetPath = endPath.split("/");
-        String op = "";
+        String op = null;
 
         switch(operation.trim()) { //XXX fixme
             case "GET":
@@ -108,10 +111,10 @@ public class DatamanagerACLFilter {
                 throw new AuthException("Unknown method");
         }
 
-        // check all rules
+        /* check all rules */
         for(AclRule rule: rules) {
 
-            // only check rules that matches systemName or $SYS constant
+            /* only check rules that matches systemName or $SYS and * constant */
             if(rule.systemName.equals(systemCN)) {
                 //logger.debug("Found matching system name: " + rule.systemName);
 
@@ -164,7 +167,32 @@ public class DatamanagerACLFilter {
                     }
 
                 }
-            } //else if *
+            } else if (rule.systemName.equals("*")) {
+                logger.debug("Found matching system name: *");
+
+                for(AclEntry acl: rule.acls) {
+                    //System.out.println("ACL-path: " + acl.path);
+                    final String[] pathParts = acl.path.split("/");
+                    final String pathSystem = pathParts[0].trim();
+                    final String pathService = pathParts[1].trim();
+
+                    //System.out.println("pathSystem: " + pathSystem);
+                    //System.out.println("pathService: " + pathService);
+                    //System.out.println("targetPath[1]: " + targetPath[1]);
+
+                    //XXX fixme!!
+                    if(pathSystem.equals("*") && pathService.equals("*")) {
+                        if(acl.operations.contains(op)) {
+                            return true;
+                        }
+                    } else if(pathSystem.equals(targetPath[0]) && (pathService.equals("*") || pathService.equals(targetPath[1]))) {
+                        if(acl.operations.contains(op)) {
+                            return true;
+                        }
+                    }
+
+                }
+            }
 
         }
         return false;
