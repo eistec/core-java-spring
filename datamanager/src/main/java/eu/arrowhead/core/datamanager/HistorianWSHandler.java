@@ -21,7 +21,7 @@ import java.util.concurrent.CopyOnWriteArrayList;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+//import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.web.socket.CloseStatus;
 import org.springframework.web.socket.TextMessage;
@@ -39,6 +39,9 @@ import com.google.gson.reflect.TypeToken;
 @Component
 public class HistorianWSHandler extends TextWebSocketHandler {
  
+    //=================================================================================================
+    // members
+
     private final Logger logger = LogManager.getLogger(HistorianWSHandler.class);
     private Gson gson = new Gson();
     
@@ -57,14 +60,12 @@ public class HistorianWSHandler extends TextWebSocketHandler {
     public void afterConnectionEstablished(WebSocketSession session) throws Exception {
         sessions.add(session);
         super.afterConnectionEstablished(session);
-        System.out.println("Got connection!");
     }
  
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus status) throws Exception {
         sessions.remove(session);
         super.afterConnectionClosed(session, status);
-        System.out.println("Connection lost!");
     }
 
     @Override
@@ -78,7 +79,7 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             payload = message.getPayload();
             logger.debug("Got message from '{}/{}'", systemName, serviceName);
 
-            Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
+            final Vector<SenML> sml = gson.fromJson(payload, new TypeToken<Vector<SenML>>(){}.getType());
             dataManagerDriver.validateSenMLMessage(systemName, serviceName, sml);
             historianService.createEndpoint(systemName, serviceName);
 
@@ -91,12 +92,10 @@ public class HistorianWSHandler extends TextWebSocketHandler {
             dataManagerDriver.validateSenMLContent(sml);
 
             final boolean statusCode = historianService.updateEndpoint(systemName, serviceName, sml);
-            logger.debug("statusCode: " + statusCode);
+            
         } catch(Exception e) {
-            System.out.println("got incorrect payload:" + e.toString());
-            logger.debug("got incorrect payload");
-            //close connection
-            session.close(); //remove from session list
+            logger.debug("Got incorrect payload");
+            session.close();
             return;
 
         }
